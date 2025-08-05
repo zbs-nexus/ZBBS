@@ -31,7 +31,37 @@ function createTodo() {
   listTodos();
 });
 
+
+// ...existing code...
+// ランダムな色とサイズを返す関数
+function getRandomCharStyle(id: string, idx: number) {
+  let seed = 0;
+  for (let i = 0; i < id.length; i++) seed += id.charCodeAt(i);
+  seed += idx * 1000;
+  function rand(min: number, max: number) {
+    seed = (seed * 9301 + 49297) % 233280;
+    const rnd = seed / 233280;
+    return Math.floor(min + rnd * (max - min));
+  }
+  const fontSize = rand(16, 32) + 'px';
+  const color = `hsl(${rand(0,360)}, 70%, 50%)`;
+  return { color, fontSize };
+}
+function deleteTodo(id: string) {
+  if (window.confirm('削除してもいいですか？')) {
+    // ランダムな色を生成
+    const randomColor = `hsl(${Math.floor(Math.random()*360)}, 70%, 85%)`;
+    document.body.style.backgroundColor = randomColor;
+    client.models.Todo.delete({ id }).then(() => {
+      listTodos();
+    });
+  }
+}
+
 </script>
+
+  
+
 
 <template>
   <main>
@@ -40,8 +70,10 @@ function createTodo() {
     <ul>
       <li 
         v-for="todo in todos" 
-        :key="todo.id">
-        {{ todo.content }}
+        :key="todo.id"
+        @click="deleteTodo(todo.id)"
+      >
+        <span v-for="(char, idx) in (todo.content || '').split('')" :key="idx" :style="getRandomCharStyle(todo.id, idx)">{{ char }}</span>
       </li>
     </ul>
     <div>
